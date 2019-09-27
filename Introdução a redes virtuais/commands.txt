@@ -1,0 +1,40 @@
+user: djr pass: 654123
+
+sudo su 
+ifconfig eth0
+
+# caso os OS possuem o mesmo IP: ifconfig eth0 192.168.56.104
+
+# ping DUT to TG
+ping 192.168.56.105
+
+# inicializar Docker - VM TG
+docker ps -a
+docker start be364cb1e75f
+docker attach be364cb1e75f
+
+
+# definir rota entre container e VM - VM DOCKER
+route add -net 172.17.0.0 netmask 255.255.0.0 gw 192.168.56.105
+
+# VM DUT
+iperf -s -P 0 -i 1 -p 5001 -f k > RESULTADOS_DUT.txt
+
+# VM TG
+iperf -c 192.168.56.104 -t 60
+
+exit
+
+# VM DUT
+lxc-start -n router1 -d 
+lxc-attach -n router1
+
+# VM TG
+iperf -s -P 0 -i 1 -p 5001 -f k > RESULTADOS_TG.txt
+
+# VM DUT
+iperf -c 192.168.56.105 -t 60
+
+
+
+
